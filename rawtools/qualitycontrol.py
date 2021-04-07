@@ -114,6 +114,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageMath
 from tqdm import tqdm
 from rawtools import dat
+from pathlib import Path
 
 def rawfp2datfp(fp):
   directory = os.path.dirname(fp)
@@ -142,6 +143,13 @@ def get_top_down_projection(args, fp):
   x, y, z = dat.read(dat_fp)["dimensions"]
   logging.debug(f'Volume dimensions: {x}, {y}, {z}')
 
+  # NOTE(tparker): Patch to skip volumes of unexpected size
+  expected_size = x * y * z * 2; # bytes
+  actual_size = Path(fp).stat().st_size
+  if (expected_size != actual_size):
+    logging.error(f"Cannot process '{fp}'. Volume was expected to be of size '{expected_size}' but was '{actual_size}'. Please check data for corruption.")
+    return
+
   # Determine output location and check for conflicts
   ofp = os.path.join(args.cwd, f'{os.path.basename(os.path.splitext(fp)[0])}-projection-top.png')
   if os.path.exists(ofp) and os.path.isfile(ofp):
@@ -162,6 +170,12 @@ def get_top_down_projection(args, fp):
   with open(fp, mode='rb', buffering=buffer_size) as ifp:
     # Load in the first slice
     byte_slice = ifp.read(buffer_size) # Byte sequence
+    try:
+      np.zeros(y * x, dtype=np.uint16).reshape(y, x)
+    except Exception as err:
+      logging.error(err)
+      return
+
     raw_image_data = np.zeros(y * x, dtype=np.uint16).reshape(y, x)
     # For each slice in the volume....
     while len(byte_slice) > 0:
@@ -208,6 +222,14 @@ def get_side_projection(args, fp):
   x, y, z = dat.read(dat_fp)["dimensions"]
   logging.debug(f'Volume dimensions: {x}, {y}, {z}')
 
+  # NOTE(tparker): Patch to skip volumes of unexpected size
+  expected_size = x * y * z * 2; # bytes
+  actual_size = Path(fp).stat().st_size
+  if (expected_size != actual_size):
+    logging.error(f"Cannot process '{fp}'. Volume was expected to be of size '{expected_size}' but was '{actual_size}'. Please check data for corruption.")
+    return
+
+
   # Determine output location and check for conflicts
   ofp = os.path.join(args.cwd, f'{os.path.basename(os.path.splitext(fp)[0])}-projection-side.png')
   if os.path.exists(ofp) and os.path.isfile(ofp):
@@ -226,6 +248,7 @@ def get_side_projection(args, fp):
   
   pbar = tqdm(total = z, desc="Generating side-view projection") # progress bar
   with open(fp, mode='rb', buffering=buffer_size) as ifp:
+
     # Load in the first slice
     byte_slice = ifp.read(buffer_size) # Byte sequence
     raw_image_data = bytearray()
