@@ -261,7 +261,7 @@ def get_side_projection(args, fp):
             else:
                 z_prime = math.floor(actual_size / (x * y * 2))
                 logging.info(
-                    f" Volume was expected to be of size '{expected_size}' but was '{actual_size}'. Please check data for corruption. Updating number of Z slices from '{z}' to '{z_prime}'."
+                    f" Volume was expected to be of size '{expected_size}' but was '{actual_size}'. Please check data for corruption. Processing only '{z_prime}' of '{z}' slices."
                 )
                 z = z_prime
 
@@ -296,9 +296,10 @@ def get_side_projection(args, fp):
         byte_slice = ifp.read(buffer_size)  # Byte sequence
         raw_image_data = bytearray()
         # For each slice in the volume....
-        while len(byte_slice) > 0:
+        while len(byte_slice) == buffer_size:
             # Convert bytes to 16-bit values
             byte_sequence_max_values = np.frombuffer(byte_slice, dtype=np.uint16)
+
             # Create a 2-D array of the data that is analogous to the image
             byte_sequence_max_values = byte_sequence_max_values.reshape(y, x)
             # 'Squash' the slice into a single row of pixels containing the highest value along the
@@ -310,6 +311,7 @@ def get_side_projection(args, fp):
             raw_image_data.extend(byte_sequence_max_values)
             # Read the next slice & update progress bar
             byte_slice = ifp.read(buffer_size)
+
             if not args.verbose:
                 pbar.update(1)
         if not args.verbose:
