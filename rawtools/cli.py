@@ -86,18 +86,31 @@ def raw_nsihdr():
 
 def raw_qc():
     """Quality control tools"""
-    description="Check the quality of a .RAW volume by extracting a slice or generating a projection. Requires a .RAW and .DAT for each volume."
+    description = "Check the quality of a .RAW volume by extracting a slice or generating a projection. Requires a .RAW and .DAT for each volume."
 
-    parser = argparse.ArgumentParser(description=description, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-V", "--version", action="version", version=f'%(prog)s {__version__}')
-    parser.add_argument("-v", "--verbose", action="store_true", help="Increase output verbosity")
-    parser.add_argument("-f", "--force", action="store_true", default=False, help="Force file creation. Overwrite any existing files.")
-    parser.add_argument("--si", action="store_true", default=False, help="Print human readable sizes (e.g., 1 K, 234 M, 2 G)")
-    parser.add_argument("-p", "--projection", action="store", nargs='+', help="Generate projection using maximum values for each slice. Available options: [ 'top', 'side' ].")
-    parser.add_argument("--scale", dest="step", const=100, action="store", nargs='?', default=argparse.SUPPRESS, type=int, help="Add scale on left side of a side projection. Step is the number of slices between each label. (default: 100)")
-    parser.add_argument("-s", "--slice", dest='index', const=True, nargs='?', type=int, default=argparse.SUPPRESS, help="Extract a slice from volume's side view. (default: floor(x/2))")
-    parser.add_argument("--font-size", dest="font_size", action="store", type=int, default=24, help="Font size of labels of scale.")
-    parser.add_argument("path", metavar='PATH', type=str, nargs='+', help='Filepath to a .RAW or path to a directory that contains .RAW files.')
+    parser = argparse.ArgumentParser(
+        description=description, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-V", "--version", action="version",
+                        version=f'%(prog)s {__version__}')
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="Increase output verbosity")
+    parser.add_argument("-f", "--force", action="store_true", default=False,
+                        help="Force file creation. Overwrite any existing files.")
+    parser.add_argument("--si", action="store_true", default=False,
+                        help="Print human readable sizes (e.g., 1 K, 234 M, 2 G)")
+    parser.add_argument("-n", '--dry-run', dest='dryrun', action="store_true",
+                        help="Perform a trial run. Do not create image files, but logs will be updated.")
+    parser.add_argument("-p", "--projection", action="store", nargs='+',
+                        help="Generate projection using maximum values for each slice. Available options: [ 'top', 'side' ].")
+    parser.add_argument("--scale", dest="step", const=100, action="store", nargs='?', default=argparse.SUPPRESS, type=int,
+                        help="Add scale on left side of a side projection. Step is the number of slices between each label. (default: 100)")
+    parser.add_argument("-s", "--slice", dest='index', const=True, nargs='?', type=int,
+                        default=argparse.SUPPRESS, help="Extract a slice from volume's side view. (default: floor(x/2))")
+    parser.add_argument("--font-size", dest="font_size", action="store",
+                        type=int, default=24, help="Font size of labels of scale.")
+    parser.add_argument("-o", "--outdir", action="store", help="Output folder to store all generated files. If not provided, each file will be placed in the folder of the source data.")
+    parser.add_argument("path", metavar='PATH', type=str, nargs='+',
+                        help='Filepath to a .RAW or path to a directory that contains .RAW files.')
     args = parser.parse_args()
 
     args.module_name = 'qc'

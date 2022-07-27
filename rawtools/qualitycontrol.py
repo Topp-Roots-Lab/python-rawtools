@@ -215,7 +215,8 @@ def get_top_down_projection(args, fp):
             array_buffer = arr.tobytes()
             pngImage = Image.new("I", arr.T.shape)
             pngImage.frombytes(array_buffer, "raw", "I;16")
-            pngImage.save(ofp)
+            if not args.dryrun:
+                pngImage.save(ofp)
 
         except Exception as err:
             logging.error(err)
@@ -332,8 +333,9 @@ def get_side_projection(args, fp):
             pngImage = Image.new("I", arr.shape)
             logging.debug(f"pngImage.frombytes(array_buffer, 'raw', \"I;16\")")
             pngImage.frombytes(array_buffer, "raw", "I;16")
-            logging.debug(f"pngImage.save(ofp)")
-            pngImage.save(ofp)
+            if not args.dryrun:
+                logging.debug(f"pngImage.save(ofp)")
+                pngImage.save(ofp)
 
             if "step" in args and args.step:
                 try:
@@ -362,7 +364,8 @@ def get_side_projection(args, fp):
                         draw.text((110, text_y), str(slice_index), font=font, fill=fill)
                         # Add line
                         draw.line((0, slice_index, 100, slice_index), fill=fill)
-                    img.save(ofp)
+                    if not args.dryrun:
+                        img.save(ofp)
                 except:
                     raise
 
@@ -453,7 +456,8 @@ def get_slice(args, fp):
         array_buffer = arr.tobytes()
         pngImage = Image.new("I", arr.T.shape)
         pngImage.frombytes(array_buffer, "raw", "I;16")
-        pngImage.save(ofp)
+        if not args.dryrun:
+            pngImage.save(ofp)
     except Exception as err:
         logging.error(err)
         sys.exit(1)
@@ -532,6 +536,8 @@ def main(args):
         for fp in args.path:
             # Set working directory for file
             args.cwd = os.path.dirname(os.path.abspath(fp))
+            if args.outdir is not None:
+                args.cwd = os.path.realpath(args.outdir)
             fp = os.path.abspath(fp)
 
             # Format file size
