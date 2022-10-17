@@ -1,7 +1,7 @@
 '''
 Created on Feb 25, 2020
 
-@author: njiang
+@author: njiang, tparker
 '''
 
 import argparse
@@ -9,10 +9,10 @@ import logging
 import os
 from importlib.metadata import version
 from multiprocessing import cpu_count
-from rich.progress import track
 
 import imageio.v3 as iio
 import numpy as np
+from rich.progress import track
 
 from rawtools import log
 
